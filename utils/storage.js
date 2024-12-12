@@ -9,6 +9,8 @@ async function initStorage() {
   await fs.ensureDir(USERS_DIR);
 }
 
+
+
 // Get user directory path
 function getUserDir(userId) {
   return path.join(USERS_DIR, userId);
@@ -73,6 +75,28 @@ async function deleteItem(userId, itemName) {
     await fs.remove(itemPath);
   }
 }
+// Save user to file
+async function saveUser(userId, data) {
+  const filePath = path.join(USERS_DIR, `user_${userId}.json`);
+  await fs.writeJson(filePath, data);
+}
+
+// Get user data
+async function getUser(userId) {
+  const filePath = path.join(USERS_DIR, `user_${userId}.json`);
+  if (await fs.pathExists(filePath)) {
+    return fs.readJson(filePath);
+  }
+  return null;
+}
+
+// Delete user
+async function deleteUser(userId) {
+  const filePath = path.join(USERS_DIR, `user_${userId}.json`);
+  if (await fs.pathExists(filePath)) {
+    await fs.remove(filePath);
+  }
+}
 
 // Upload a file
 async function uploadFile(userId, file, fileName) {
@@ -122,4 +146,4 @@ async function getMetadata(userId, itemName) {
   return meta[itemName];
 }
 
-module.exports = { initStorage, createItem, listUserItems, deleteItem, uploadFile, attachMetadata, getMetadata };
+module.exports = { initStorage, saveUser, getUser, deleteUser, createItem, listUserItems, deleteItem, uploadFile, attachMetadata, getMetadata};
