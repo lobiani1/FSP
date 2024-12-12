@@ -1,0 +1,10 @@
+{
+  "fruit": {
+    "creationDate": "2024-12-12",
+    "tags": [
+      "yummy",
+      "sweet"
+    ],
+    "notes": "This is a test file."
+  }
+}
