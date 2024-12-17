@@ -9,8 +9,6 @@ async function initStorage() {
   await fs.ensureDir(USERS_DIR);
 }
 
-
-
 // Get user directory path
 function getUserDir(userId) {
   return path.join(USERS_DIR, userId);
@@ -75,6 +73,7 @@ async function deleteItem(userId, itemName) {
     await fs.remove(itemPath);
   }
 }
+
 // Save user to file
 async function saveUser(userId, data) {
   const filePath = path.join(USERS_DIR, `user_${userId}.json`);
@@ -146,4 +145,36 @@ async function getMetadata(userId, itemName) {
   return meta[itemName];
 }
 
-module.exports = { initStorage, saveUser, getUser, deleteUser, createItem, listUserItems, deleteItem, uploadFile, attachMetadata, getMetadata};
+// Get file for download
+async function getFile(userId, itemName) {
+  const userDir = getUserDir(userId);
+  const filePath = path.join(userDir, itemName);
+
+  // Check if the file exists
+  if (!(await fs.pathExists(filePath))) {
+    throw new Error('File not found');
+  }
+
+  // Return file information (path and name)
+  return {
+    path: filePath,
+    name: itemName
+  };
+}
+
+
+
+
+module.exports = { 
+  initStorage, 
+  saveUser, 
+  getUser, 
+  deleteUser, 
+  createItem, 
+  listUserItems, 
+  deleteItem, 
+  uploadFile, 
+  attachMetadata, 
+  getMetadata, 
+  getFile
+};
