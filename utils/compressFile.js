@@ -2,7 +2,7 @@ const fs = require('fs');
 const zlib = require('zlib');
 
 process.on('message', ({ inputPath, outputPath }) => {
-    // Check if the input file exists
+    
     fs.stat(inputPath, (err, stats) => {
         if (err || !stats.isFile()) {
             process.send({ success: false, error: `Input file does not exist: ${inputPath}` });

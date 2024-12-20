@@ -4,17 +4,17 @@ const path = require('path');
 const USERS_DIR = path.join(__dirname, '../users');
 const META_FILE = 'metadata.json';
 
-// Initialize directory
+
 async function initStorage() {
   await fs.ensureDir(USERS_DIR);
 }
 
-// Get user directory path
+
 function getUserDir(userId) {
   return path.join(USERS_DIR, userId);
 }
 
-// Create folder or file
+
 async function createItem(userId, itemName, isFolder = true) {
   const userDir = getUserDir(userId);
   const itemPath = path.join(userDir, itemName);
@@ -30,7 +30,6 @@ async function createItem(userId, itemName, isFolder = true) {
   }
 }
 
-// List folder structure
 async function listUserItems(userId) {
   const userDir = getUserDir(userId);
   if (!(await fs.pathExists(userDir))) {
@@ -53,7 +52,7 @@ async function listUserItems(userId) {
   return traverse(userDir);
 }
 
-// Delete item (only empty folders can be deleted)
+
 async function deleteItem(userId, itemName) {
   const userDir = getUserDir(userId);
   const itemPath = path.join(userDir, itemName);
@@ -74,13 +73,13 @@ async function deleteItem(userId, itemName) {
   }
 }
 
-// Save user to file
+
 async function saveUser(userId, data) {
   const filePath = path.join(USERS_DIR, `user_${userId}.json`);
   await fs.writeJson(filePath, data);
 }
 
-// Get user data
+
 async function getUser(userId) {
   const filePath = path.join(USERS_DIR, `user_${userId}.json`);
   if (await fs.pathExists(filePath)) {
@@ -89,7 +88,7 @@ async function getUser(userId) {
   return null;
 }
 
-// Delete user
+
 async function deleteUser(userId) {
   const filePath = path.join(USERS_DIR, `user_${userId}.json`);
   if (await fs.pathExists(filePath)) {
@@ -97,7 +96,7 @@ async function deleteUser(userId) {
   }
 }
 
-// Upload a file
+
 async function uploadFile(userId, file, fileName) {
   const userDir = path.join(USERS_DIR, userId);
   const filePath = path.join(userDir, fileName);
@@ -109,7 +108,7 @@ async function uploadFile(userId, file, fileName) {
   await fs.writeFile(filePath, file);
 }
 
-// Attach metadata to a file or folder
+
 async function attachMetadata(userId, itemName, metadata) {
   const userDir = path.join(USERS_DIR, userId);
   const itemPath = path.join(userDir, itemName);
@@ -128,7 +127,7 @@ async function attachMetadata(userId, itemName, metadata) {
   await fs.writeJson(metaPath, meta, { spaces: 2 });
 }
 
-// Retrieve metadata
+
 async function getMetadata(userId, itemName) {
   const userDir = path.join(USERS_DIR, userId);
   const metaPath = path.join(userDir, META_FILE);
@@ -145,17 +144,17 @@ async function getMetadata(userId, itemName) {
   return meta[itemName];
 }
 
-// Get file for download
+
 async function getFile(userId, itemName) {
   const userDir = getUserDir(userId);
   const filePath = path.join(userDir, itemName);
 
-  // Check if the file exists
+  
   if (!(await fs.pathExists(filePath))) {
     throw new Error('File not found');
   }
 
-  // Return file information (path and name)
+  
   return {
     path: filePath,
     name: itemName
