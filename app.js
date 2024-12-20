@@ -15,25 +15,25 @@ dotenv.config();
 
 const app = express();
 const upload = multer();
-const USERS_DIR = path.join(__dirname, process.env.USERS_DIR || 'users'); // Use process.env for configuration
+const USERS_DIR = path.join(__dirname, process.env.USERS_DIR || 'users'); 
 const DOWNLOADS_DIR = path.join(__dirname, process.env.DOWNLOADS_DIR || 'downloads');
 const DOWNLOAD_LINK_EXPIRATION_MINUTES = parseInt(process.env.DOWNLOAD_LINK_EXPIRATION_MINUTES, 10) || 60;
 app.use(bodyParser.json());
 
-// Store active links and their expiration time
+
 const activeLinks = {};
 
 const PORT = 3000;
 
-// Initialize storage
+
 initStorage();
 
-// User Registration
+
 app.post('/api/v1/user/create', async (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) return res.status(400).send({ message: 'Invalid input' });
 
-  const userId = username; // Use username as unique identifier
+  const userId = username; 
   const existingUser = await getUser(userId);
   if (existingUser) return res.status(400).send({ message: 'User already exists' });
 
@@ -44,7 +44,7 @@ app.post('/api/v1/user/create', async (req, res) => {
   res.status(201).send({ message: 'User registered successfully' });
 });
 
-// User Validation
+
 app.post('/api/v1/user/validate', async (req, res) => {
   const { username } = req.body;
   const userId = username;
@@ -54,7 +54,7 @@ app.post('/api/v1/user/validate', async (req, res) => {
   res.status(200).send({ message: 'User is valid' });
 });
 
-// User Login
+
 app.post('/api/v1/user/login', async (req, res) => {
   const { username, password } = req.body;
   const userId = username;
@@ -69,7 +69,7 @@ app.post('/api/v1/user/login', async (req, res) => {
   res.status(200).send({ message: 'Login successful', token });
 });
 
-// Delete User
+
 app.post('/api/v1/user/delete', async (req, res) => {
   const { token } = req.headers;
   try {
@@ -83,7 +83,7 @@ app.post('/api/v1/user/delete', async (req, res) => {
 
 
 
-// Middleware to extract userId from JWT
+
 function authenticate(req, res, next) {
   const token = req.headers.authorization?.split(' ')[1];
   try {
@@ -95,7 +95,7 @@ function authenticate(req, res, next) {
   }
 }
 
-// List all items
+
 app.get('/api/v1/user/space', authenticate, async (req, res) => {
   try {
     const items = await listUserItems(req.userId);
@@ -105,7 +105,7 @@ app.get('/api/v1/user/space', authenticate, async (req, res) => {
   }
 });
 
-// Create a folder or file
+
 app.put('/api/v1/user/space/create', authenticate, async (req, res) => {
   const { itemName, isFolder = true } = req.body;
   if (!itemName) return res.status(400).send({ message: 'Item name is required' });
@@ -118,7 +118,7 @@ app.put('/api/v1/user/space/create', authenticate, async (req, res) => {
   }
 });
 
-// Delete a file or folder (only empty folders can be deleted)
+
 app.delete('/api/v1/user/space/file', authenticate, async (req, res) => {
   const { itemName } = req.body;
   if (!itemName) return res.status(400).send({ message: 'Item name is required' });
@@ -132,7 +132,7 @@ app.delete('/api/v1/user/space/file', authenticate, async (req, res) => {
 });
 
 
-// Middleware to authenticate users
+
 function authenticate(req, res, next) {
   const token = req.headers.authorization?.split(' ')[1];
   try {
@@ -144,7 +144,7 @@ function authenticate(req, res, next) {
   }
 }
 
-// Upload a file
+
 app.post('/api/v1/user/space/upload', authenticate, upload.single('file'), async (req, res) => {
     const { file } = req;
     const { fileName } = req.body;
@@ -154,20 +154,20 @@ app.post('/api/v1/user/space/upload', authenticate, upload.single('file'), async
     }
 
     try {
-        const tempPath = path.join(DOWNLOADS_DIR, fileName); // Temporary upload location
-        await fs.outputFile(tempPath, file.buffer); // Save the uploaded file
+        const tempPath = path.join(DOWNLOADS_DIR, fileName); 
+        await fs.outputFile(tempPath, file.buffer); 
 
-        const compressedPath = `${tempPath}.gz`; // Compressed file location
+        const compressedPath = `${tempPath}.gz`; 
 
-        // Use the child process to compress the file
+        
         await compressFile(tempPath, compressedPath);
 
-        // Move the compressed file to the user’s space
+        
         await uploadFile(req.userId, await fs.readFile(compressedPath), `${fileName}.gz`);
 
         res.status(201).send({ message: 'File uploaded and compressed successfully' });
 
-        // Clean up temporary files
+        
         fs.remove(tempPath);
         fs.remove(compressedPath);
     } catch (err) {
@@ -177,7 +177,7 @@ app.post('/api/v1/user/space/upload', authenticate, upload.single('file'), async
 });
 
 
-// Attach metadata to a file or folder
+
 app.post('/api/v1/user/space/meta', authenticate, async (req, res) => {
   const { itemName, metadata } = req.body;
 
@@ -193,7 +193,7 @@ app.post('/api/v1/user/space/meta', authenticate, async (req, res) => {
   }
 });
 
-// Retrieve metadata
+
 app.get('/api/v1/user/space/meta', authenticate, async (req, res) => {
   const { itemName } = req.query;
 
@@ -209,7 +209,7 @@ app.get('/api/v1/user/space/meta', authenticate, async (req, res) => {
   }
 });
 
-// Helper function to create a zip of a folder
+
 function zipFolder(folderPath, zipPath) {
   return new Promise((resolve, reject) => {
     const output = fs.createWriteStream(zipPath);
@@ -224,7 +224,7 @@ function zipFolder(folderPath, zipPath) {
   });
 }
 
-// Generate a secure, short download link
+
 app.get('/api/v1/user/share', authenticate, async (req, res) => {
   const { itemName } = req.query;
   const userDir = path.join(USERS_DIR, req.userId);
@@ -234,16 +234,16 @@ app.get('/api/v1/user/share', authenticate, async (req, res) => {
     return res.status(400).send({ message: 'Item name is required' });
   }
 
-  // Check if the item exists
+  
   if (!(await fs.pathExists(itemPath))) {
     return res.status(404).send({ message: 'Item not found' });
   }
 
   const shortLinkId = uuidv4();
-  const expirationTime = Date.now() + DOWNLOAD_LINK_EXPIRATION_MINUTES * 60000; // Expire after configurable minutes
+  const expirationTime = Date.now() + DOWNLOAD_LINK_EXPIRATION_MINUTES * 60000; 
   const downloadLink = `/download/${shortLinkId}`;
 
-  // Store the short link with expiration time
+
   activeLinks[shortLinkId] = {
     itemPath,
     expirationTime,
@@ -253,7 +253,7 @@ app.get('/api/v1/user/share', authenticate, async (req, res) => {
   res.status(200).send({ downloadLink });
 });
 
-// Download file or folder by short link
+
 app.get('/download/:id', async (req, res) => {
   const { id } = req.params;
   const linkData = activeLinks[id];
@@ -264,7 +264,7 @@ app.get('/download/:id', async (req, res) => {
 
   const currentTime = Date.now();
   if (linkData.expirationTime < currentTime) {
-    // If the link has expired, remove it from activeLinks
+   
     delete activeLinks[id];
     return res.status(410).send({ message: 'Link has expired' });
   }
@@ -272,7 +272,7 @@ app.get('/download/:id', async (req, res) => {
   const itemPath = linkData.itemPath;
 
   if (linkData.isFolder) {
-    // If it's a folder, zip it before sending
+    
     const zipPath = path.join(DOWNLOADS_DIR, `${id}.zip`);
     try {
       await zipFolder(itemPath, zipPath);
@@ -280,13 +280,13 @@ app.get('/download/:id', async (req, res) => {
         if (err) {
           res.status(500).send({ message: 'Error in file download' });
         }
-        fs.remove(zipPath); // Remove the zip file after download
+        fs.remove(zipPath); 
       });
     } catch (err) {
       res.status(500).send({ message: 'Error zipping folder' });
     }
   } else {
-    // If it's a file, just send it directly
+   
     res.download(itemPath, err => {
       if (err) {
         res.status(500).send({ message: 'Error in file download' });
@@ -294,7 +294,7 @@ app.get('/download/:id', async (req, res) => {
     });
   }
 
-  // Once the link is used, remove it from activeLinks
+  
   delete activeLinks[id];
 });
 
@@ -302,28 +302,28 @@ app.get('/download/:id', async (req, res) => {
 
 
 
-// Graceful shutdown
+
 process.on('SIGINT', () => {
   console.log('\nGracefully shutting down...');
-  process.exit(0); // Clean exit
+  process.exit(0); 
 });
 
 process.on('SIGTERM', () => {
   console.log('Termination signal received. Shutting down...');
-  process.exit(0); // Clean exit
+  process.exit(0); 
 });
 
-// Logging using stdout and stderr
+
 console.log('Starting the server...');
 process.stderr.write('Errors will be logged here.\n');
 process.stdout.write(`Server will run on port ${PORT}\n`);
 
-// Forked child process for file compression during uploads
+
 function compressFile(inputPath, outputPath) {
   return new Promise((resolve, reject) => {
-      const child = fork('./utils/compressFile.js'); // Fork a child process for compression
+      const child = fork('./utils/compressFile.js'); 
 
-      child.send({ inputPath, outputPath }); // Send paths to the child process
+      child.send({ inputPath, outputPath }); 
 
       child.on('message', (message) => {
           if (message.success) {
@@ -337,7 +337,6 @@ function compressFile(inputPath, outputPath) {
   });
 }
 
-// File upload with compression
 app.post('/api/v1/user/space/upload', authenticate, upload.single('file'), async (req, res) => {
   const { file } = req;
   const { fileName } = req.body;
@@ -347,17 +346,17 @@ app.post('/api/v1/user/space/upload', authenticate, upload.single('file'), async
   }
 
   try {
-      const tempPath = path.join(DOWNLOADS_DIR, fileName); // Temporary upload location
-      await fs.outputFile(tempPath, file.buffer); // Save the uploaded file
+      const tempPath = path.join(DOWNLOADS_DIR, fileName); 
+      await fs.outputFile(tempPath, file.buffer); 
 
-      const compressedPath = `${tempPath}.gz`; // Compressed file location
-      await compressFile(tempPath, compressedPath); // Use child process to compress
+      const compressedPath = `${tempPath}.gz`; 
+      await compressFile(tempPath, compressedPath); 
 
-      // Move the compressed file to the user’s space
+      
       await uploadFile(req.userId, await fs.readFile(compressedPath), `${fileName}.gz`);
       res.status(201).send({ message: 'File uploaded and compressed successfully' });
 
-      // Clean up temporary files
+      
       fs.remove(tempPath);
       fs.remove(compressedPath);
   } catch (err) {
@@ -366,10 +365,9 @@ app.post('/api/v1/user/space/upload', authenticate, upload.single('file'), async
   }
 });
 
-// Zip folder implementation for sharing
 function zipFolder(folderPath, zipPath) {
   return new Promise((resolve, reject) => {
-      const child = fork('./utils/zipFolder.js'); // Fork a child process for zipping
+      const child = fork('./utils/zipFolder.js'); 
       child.send({ folderPath, zipPath });
 
       child.on('message', (message) => {
@@ -383,7 +381,7 @@ function zipFolder(folderPath, zipPath) {
       child.on('error', reject);
   });
 }
-// Download a file
+
 app.get('/api/v1/user/space/download', authenticate, async (req, res) => {
   const { itemName } = req.query;
   
@@ -392,14 +390,14 @@ app.get('/api/v1/user/space/download', authenticate, async (req, res) => {
   }
 
   try {
-    // Retrieve file from storage (e.g., file system or database)
-    const file = await getFile(req.userId, itemName); // This function should be implemented in your storage logic
+    
+    const file = await getFile(req.userId, itemName); 
     if (!file) {
       return res.status(404).send({ message: 'File not found' });
     }
     
-    // Send the file as a download
-    res.download(file.path, file.name); // Adjust based on your storage system
+    
+    res.download(file.path, file.name); 
   } catch (err) {
     res.status(400).send({ message: err.message });
   }
@@ -407,7 +405,7 @@ app.get('/api/v1/user/space/download', authenticate, async (req, res) => {
 
 app.get('/api/v1/user/space/download/:fileName', authenticate, async (req, res) => {
   const { fileName } = req.params;
-  const compressedFilePath = path.join(DOWNLOADS_DIR, `${fileName}.gz`); // Path to the compressed file
+  const compressedFilePath = path.join(DOWNLOADS_DIR, `${fileName}.gz`); 
 
   try {
     // Check if the file exists
@@ -416,11 +414,11 @@ app.get('/api/v1/user/space/download/:fileName', authenticate, async (req, res) 
       return res.status(404).send({ message: 'File not found' });
     }
 
-    // Create a read stream from the compressed file
+   
     const readStream = fs.createReadStream(compressedFilePath);
-    const unzip = zlib.createGunzip(); // Decompression stream
+    const unzip = zlib.createGunzip(); 
 
-    // Pipe the decompressed data directly to the response
+    
     res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
     readStream.pipe(unzip).pipe(res);
   } catch (err) {
@@ -431,7 +429,7 @@ app.get('/api/v1/user/space/download/:fileName', authenticate, async (req, res) 
 
 
 
-// Start server
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
