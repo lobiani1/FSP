@@ -408,7 +408,7 @@ app.get('/api/v1/user/space/download/:fileName', authenticate, async (req, res) 
   const compressedFilePath = path.join(DOWNLOADS_DIR, `${fileName}.gz`); 
 
   try {
-    // Check if the file exists
+    
     const fileExists = await fs.pathExists(compressedFilePath);
     if (!fileExists) {
       return res.status(404).send({ message: 'File not found' });
