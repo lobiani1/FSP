@@ -427,9 +427,6 @@ app.get('/api/v1/user/space/download/:fileName', authenticate, async (req, res) 
   }
 });
 
-
-
-
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
